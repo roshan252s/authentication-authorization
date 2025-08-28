@@ -27,7 +27,7 @@ router.post('/add', async (req, res) => {
 })
 router.get('/', async (req, res) => {
 
-   res.status(200).json("Welcome to Student Management System API")
+    res.status(200).json("Welcome to Student Management System API")
 
 })
 router.get('/get', async (req, res) => {
