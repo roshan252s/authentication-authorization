@@ -25,6 +25,11 @@ router.post('/add', async (req, res) => {
         res.status(500).json({ err: "Internal server error" })
     }
 })
+router.get('/', async (req, res) => {
+
+   res.status(200).json("Welcome to Student Management System API")
+
+})
 router.get('/get', async (req, res) => {
 
     try {
