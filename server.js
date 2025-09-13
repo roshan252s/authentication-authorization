@@ -1,16 +1,19 @@
 require('dotenv').config()
-const express = require ('express')
+const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000
-const db = require('./db')
+require('./db')
 
-const bodyParser = require ('body-parser')
+
+const bodyParser = require('body-parser')
 app.use(bodyParser.json())
 
 const studentRoutes = require('./routes/studentRoutes')
+app.use('/student', studentRoutes)
 
-app.use('/',studentRoutes)
+const teacherRoutes = require('./routes/teacherRoutes')
+app.use('/teacher', teacherRoutes)
 
-app.listen(port,()=>{
-    console.log(`Database connected to port ${port}`);
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
 })
