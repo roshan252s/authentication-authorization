@@ -52,7 +52,7 @@ stdSchema.pre('save', async function (next) {
         const hashedPassword = await bcrypt.hash(student.password, salt)
         student.password = hashedPassword
         next()
-    
+
     } catch (error) {
         return next(error)
     }
@@ -68,7 +68,6 @@ stdSchema.methods.comparePassword = async function (candidatePassword) {
         throw new Error('Password comparison failed')
     }
 }
-
 
 
 const Student = mongoose.model('Student', stdSchema)

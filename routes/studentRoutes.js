@@ -4,26 +4,24 @@ const router = express.Router()
 
 const Student = require('../models/student')
 
-const passport = require('../auth')
 
-
-router.use(passport.initialize())
-const localAuth = passport.authenticate('local', { session: false })
+const { jwtAuthMiddleware, generateToken } = require('../jwt')
 
 
 
-// router.use(logRequest) // This will log for all the routes
-
-
-// Add a new student. (logRequest is the middleware function which runs only for this route)
-router.post('/addStd', async (req, res) => {
+router.post('/signup', async (req, res) => {
     try {
         const stdData = await req.body
         const newStd = new Student(stdData)
 
         const response = await newStd.save()
+        const payload = {
+            id: response._id,
+            username: response.username,
+        }
+        const token = generateToken(payload)
         console.log('Data submitted succesfully');
-        res.status(200).json(response)
+        res.status(200).json({ response, token })
 
     } catch (err) {
         console.log("Error")
@@ -31,7 +29,28 @@ router.post('/addStd', async (req, res) => {
     }
 })
 
-router.get('/getStd', localAuth, async (req, res) => {
+
+
+router.post('/login', async (req, res) => {
+    const { username, password } = req.body
+
+    try {
+        const user = await Student.findOne({ username })        
+        if(!user || !(await user.comparePassword(password))){
+            return res.status(401).json({ Error: "Incorrect username or password" })
+        }
+        const payload = {
+            username:user.username,
+            id:user._id
+        }
+        const token = generateToken(payload)
+        res.status(200).json(token)
+    } catch (error) {
+        res.status(500).json({ message: "Server Error found" })
+    }
+})
+
+router.get('/getStd',jwtAuthMiddleware, async (req, res) => {
     try {
         const studentData = await Student.find()
         console.log('student data fetched');
@@ -43,10 +62,21 @@ router.get('/getStd', localAuth, async (req, res) => {
     }
 
 })
-router.get('/', async (req, res) => {
-    res.send('Welcome to the Student Management System API')
+router.get('/profile',jwtAuthMiddleware, async (req, res) => {
+    try {
+        const userData = req.user
+
+        const id = userData.id
+        const student = await Student.findById(id)
+        res.status(200).json(student)
+
+    } catch (err) {
+        console.log("Error")
+        res.status(500).json({ err: "Internal server error" })
+    }
 
 })
+
 router.put('/updateStd/:id', async (req, res) => {
 
     try {
